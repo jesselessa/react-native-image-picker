@@ -1,9 +1,22 @@
-import React from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
+// React
+import { useState } from "react";
+// React Native
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+} from "react-native";
+// Other library
 import * as ImagePicker from "expo-image-picker";
 
 export default function App() {
-  // Picking an image
+  // Hook - State
+  let [selectedImage, setSelectedImage] = useState(null);
+
+  // API call
   let openImagePickerAsync = async () => {
     let permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -14,52 +27,60 @@ export default function App() {
     }
 
     let pickerResult = await ImagePicker.launchImageLibraryAsync();
-    console.log(pickerResult);
+    if (pickerResult.cancelled === true) {
+      return;
+    }
+
+    setSelectedImage({ localUri: pickerResult.uri });
   };
 
-  // Using the selected image
   return (
-    <View style={styles.container}>
-      <View>
-        <Image
-          source={{ uri: "https://i.imgur.com/TkIrScD.png" }}
-          style={styles.img}
-        />
+    <ScrollView style={styles.body}>
+      <View style={styles.container}>
+        {selectedImage !== null && (
+          <View style={styles.container}>
+            <Image
+              source={{ uri: selectedImage.localUri }}
+              style={styles.picture}
+            />
+          </View>
+        )}
+
+        <TouchableOpacity onPress={openImagePickerAsync} style={styles.btn}>
+          <Text style={styles.btnText}>Add a profile picture</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.btn} onPress={openImagePickerAsync}>
-        <Text style={styles.btnTxt}>Add a profile picture</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  body: {
+    marginTop: 80,
+  },
+
   container: {
     flex: 1,
-    backgroundColor: "lightblue",
     alignItems: "center",
     justifyContent: "center",
   },
-  circle: {
-    // width: 250,
-    // height: 250,
-    // borderRadius: 150,
-    backgroundColor: "white",
-    borderWidth: 1,
-  },
-  img: { width: 270, height: 270, borderRadius: 150 },
+
   btn: {
-    backgroundColor: "#fff",
-    width: 200,
-    justifyContent: "center",
-    height: 50,
-    borderRadius: 8,
+    backgroundColor: "lightblue",
+    padding: 20,
+    borderRadius: 10,
     marginTop: 20,
+    borderColor: "black",
     borderWidth: 1,
   },
-  btnTxt: {
+  btnText: {
     fontSize: 20,
     color: "black",
-    textAlign: "center",
+  },
+  picture: {
+    width: 300,
+    height: 300,
+    borderRadius: 200,
+    marginTop: 30,
   },
 });
